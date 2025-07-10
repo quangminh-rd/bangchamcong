@@ -3,7 +3,6 @@ const RANGE = 'cham_cong_theo_ca!A:X';
 const API_KEY = 'AIzaSyA9g2qFUolpsu3_HVHOebdZb0NXnQgXlFM';
 
 document.addEventListener('DOMContentLoaded', () => {
-    showPopup("Mời chọn thông tin!");
     const script = document.createElement('script');
     script.src = "https://apis.google.com/js/api.js";
     script.onload = initializeGAPI;
@@ -14,6 +13,12 @@ function getDataFromURI() {
     const url = window.location.href;
     const match = url.match(/maNhanvien=([^?&]*)/);
     return match ? decodeURIComponent(match[1]) : null;
+}
+
+function getKhuVucFromURI() {
+    const url = window.location.href;
+    const match = url.match(/khuVuc=([^?&]*)/);
+    return match ? decodeURIComponent(match[1]).split('-') : [];
 }
 
 function updateContent(message) {
@@ -61,6 +66,23 @@ function populateSelect(maList, rows) {
         nhanvienSelect.appendChild(opt);
     });
 
+    const khuvucSelect = document.getElementById('khuvucSelect');
+    const danhSachKhuVuc = getKhuVucFromURI();
+
+    // Tạo option khu vực
+    const allKhuvucOpt = document.createElement('option');
+    allKhuvucOpt.value = 'ALL';
+    allKhuvucOpt.textContent = 'Tất cả';
+    khuvucSelect.appendChild(allKhuvucOpt);
+
+    danhSachKhuVuc.forEach(kv => {
+        const opt = document.createElement('option');
+        opt.value = kv;
+        opt.textContent = kv;
+        khuvucSelect.appendChild(opt);
+    });
+    khuvucSelect.value = 'ALL'; // Default
+
     // Tạo danh sách tháng (01 - 12)
     for (let i = 1; i <= 12; i++) {
         const thang = String(i).padStart(2, '0');
@@ -88,21 +110,34 @@ function populateSelect(maList, rows) {
 
     // Sự kiện thay đổi
     nhanvienSelect.addEventListener('change', () => {
-        fetchAndRenderFor(nhanvienSelect.value, thangSelect.value, namSelect.value, rows);
+        fetchAndRenderFor(khuvucSelect.value, nhanvienSelect.value, thangSelect.value, namSelect.value, rows);
+    });
+
+    // Gắn event cho khu vực
+    khuvucSelect.addEventListener('change', () => {
+        fetchAndRenderFor(khuvucSelect.value, nhanvienSelect.value, thangSelect.value, namSelect.value, rows);
     });
 
     namSelect.addEventListener('change', () => {
-        fetchAndRenderFor(nhanvienSelect.value, thangSelect.value, namSelect.value, rows);
+        fetchAndRenderFor(khuvucSelect.value, nhanvienSelect.value, thangSelect.value, namSelect.value, rows);
     });
 
     thangSelect.addEventListener('change', () => {
-        fetchAndRenderFor(nhanvienSelect.value, thangSelect.value, namSelect.value, rows);
+        fetchAndRenderFor(khuvucSelect.value, nhanvienSelect.value, thangSelect.value, namSelect.value, rows);
     });
 
+    // Sau khi setup xong, gọi fetchAndRenderFor tự động
+    const maNhanvien = nhanvienSelect.value;
+    const thang = thangSelect.value;
+    const nam = namSelect.value;
+    const khuVuc = khuvucSelect.value;
+
+    fetchAndRenderFor(khuVuc, maNhanvien, thang, nam, rows);
 
 }
 
-async function fetchAndRenderFor(maNhanvien, thang, nam) {
+async function fetchAndRenderFor(khuVuc, maNhanvien, thang, nam) {
+    const selectedKhuVuc = document.getElementById('khuvucSelect').value;
     try {
         const rows = await fetchData();
         const danhSachMa = getDataFromURI().split('-');
@@ -116,7 +151,7 @@ async function fetchAndRenderFor(maNhanvien, thang, nam) {
         const maList = maNhanvien === 'ALL' ? danhSachMa : [maNhanvien];
 
         for (const ma of maList) {
-            const filtered = filterDataByNhanVienThangNam(rows, ma, thang, nam);
+            const filtered = filterDataByNhanVienThangNam(rows, ma, thang, nam, selectedKhuVuc);
             if (filtered.length > 0) allFiltered.push({ ma, data: filtered });
         }
 
@@ -186,18 +221,20 @@ async function fetchData() {
     return res.result.values || [];
 }
 
-function filterDataByNhanVienThangNam(rows, maNhanvien, thang, nam) {
+function filterDataByNhanVienThangNam(rows, maNhanvien, thang, nam, khuVuc = 'ALL') {
     return rows.filter(row => {
         const ma = row[2];
         const ngay = row[5];
+        const kv = row[19]; // Cột T
         const ten = row[3];
         const [dd, mm, yyyy] = (ngay || '').split('/');
 
-        const matchMa = (maNhanvien === '__ALL__') || maNhanvien === ma;
+        const matchMa = (maNhanvien === 'ALL') || maNhanvien === ma;
         const matchThang = mm === thang;
         const matchNam = yyyy === nam;
+        const matchKhuVuc = khuVuc === 'ALL' || kv === khuVuc;
 
-        return matchMa && matchThang && matchNam;
+        return matchMa && matchThang && matchNam && matchKhuVuc;
     });
 }
 
