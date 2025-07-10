@@ -201,6 +201,7 @@ function initializeGAPI() {
                 return;
             }
 
+
             const danhSachMa = maNhanviens.split('-');
             const rows = await fetchData();
             populateSelect(danhSachMa, rows);
