@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BẢNG CHẤM CÔNG</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.2.0/exceljs.min.js"></script>
+</head>
+
+<body>
+    <div class="content">
+        <img src="https://i.imgur.com/wfxMMZS.png" alt="Mô tả hình ảnh">
+        <h2 style="text-align: center">BẢNG CHẤM CÔNG</h2>
+        <label for="nhanvienSelect"><strong>Chọn nhân viên:</strong></label>
+        <select id="nhanvienSelect" style="margin-left: 10px; padding: 5px;"></select>
+
+        <label for="namSelect" style="margin-left: 20px;"><strong>Chọn năm:</strong></label>
+        <select id="namSelect" style="margin-left: 10px; padding: 5px;"></select>
+
+        <label for="thangSelect" style="margin-left: 20px;"><strong>Chọn tháng:</strong></label>
+        <select id="thangSelect" style="margin-left: 10px; padding: 5px;"></select>
+
+
+
+        <table class="bordered-table">
+            <thead id="tableHeader"></thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+
+    </div>
+    <!-- Modal popup -->
+    <div id="customPopup" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closePopup()">&times;</span>
+            <p id="popupMessage">Không có dữ liệu chấm công!</p>
+        </div>
+    </div>
+
+</body>
+
+
+</html>

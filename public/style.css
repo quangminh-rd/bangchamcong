@@ -1,0 +1,272 @@
+        @page {
+            size: A4 landscape;
+            margin: 20mm;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            background: url('https://i.imgur.com/BrJoeOv.png') no-repeat center center;
+            background-size: 297mm auto;
+            opacity: 0.99;
+        }
+
+        .content {
+            width: 100%;
+            max-width: 297mm;
+            margin: auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 6px;
+        }
+
+        h3 {
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 0 auto 20px;
+        }
+
+
+        .bordered-table {
+            size: A4;
+            width: 100%;
+            max-width: 297mm;
+            border-collapse: collapse;
+            margin-top: 10px;
+            table-layout: fixed;
+            font-size: 11px;
+        }
+
+        .bordered-table th,
+        .bordered-table td {
+            border: 0.5px solid black;
+            padding: 5px;
+            word-wrap: break-word;
+            page-break-inside: avoid;
+        }
+
+        .row-no-bottom td:not(:nth-child(-n+2)):not(:nth-last-child(-n+3)) {
+            border-bottom: none !important;
+        }
+
+
+        /* Nét đứt giữa Buổi sáng và Buổi chiều */
+        .row-dashed-middle td {
+            border-top: 1px dashed #666 !important;
+        }
+
+
+        .borderedcol-1 {
+            width: 1%;
+            text-align: center;
+        }
+
+        .borderedcol-2 {
+            width: 9%;
+            text-align: left;
+        }
+
+        .borderedcol-3 {
+            width: 6%;
+            text-align: left;
+        }
+
+        /* Mỗi ngày trong tháng */
+        .borderedcol-day {
+            font-size: 9px;
+            padding: 2px;
+            width: 2%;
+            text-align: center;
+        }
+
+        .borderedcol-total {
+            width: 3.5%;
+            text-align: center;
+        }
+
+        .highlight-x {
+            color: red;
+            font-weight: bold;
+        }
+
+        .highlight-cn {
+            background-color: #09b9ff !important;
+            /* Màu xanh dương nhạt */
+        }
+
+        .highlight-header-green {
+            background-color: #b6db99;
+            /* xanh lá cây nhạt */
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px 30px;
+            border: 1px solid #888;
+            width: 300px;
+            text-align: center;
+            border-radius: 10px;
+            position: relative;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s;
+        }
+
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            right: 12px;
+            top: 8px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .close-button:hover {
+            color: red;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+            }
+
+            to {
+                transform: translateY(0);
+            }
+        }
+
+
+        @media print {
+
+            body {
+                margin: 0;
+                padding: 0;
+            }
+
+            #content {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            body {
+                font-family: 'Times New Roman', Times, serif;
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-sizing: border-box;
+                background: url('https://i.imgur.com/BrJoeOv.png') no-repeat center center;
+                background-size: 210mm auto;
+                opacity: 0.99;
+            }
+
+            .content {
+                width: 100%;
+                max-width: 297mm;
+                margin: auto;
+                padding: 10px;
+                background: rgba(255, 255, 255, 0.95);
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                position: relative;
+                z-index: 1;
+            }
+
+            h2 {
+                text-align: center;
+                font-size: 16px;
+                margin-bottom: 6px;
+            }
+
+            h3 {
+                text-align: center;
+                font-size: 12px;
+                margin-bottom: 6px;
+            }
+
+            p {
+                margin: 2px 0;
+                font-size: 8px;
+            }
+
+            img {
+                display: block;
+                max-width: 100%;
+                height: auto;
+                margin: 0 auto 16px;
+            }
+
+            .bordered-table-m {
+                size: A4;
+                width: 100%;
+                max-width: 297mm;
+                border-collapse: collapse;
+                margin-top: 10px;
+                table-layout: fixed;
+                font-size: 9px;
+            }
+
+            .bordered-table th,
+            .bordered-table td {
+                border: 0.5px solid black;
+                padding: 5px;
+                word-wrap: break-word;
+                page-break-inside: avoid;
+            }
+        }
