@@ -263,7 +263,7 @@ function processChamCongData(filtered) {
 
         const raw = (row[12] || '').toString().replace(',', '.');
         const val = parseFloat(raw);
-        const chamCong = !isNaN(val) ? (val === 4 ? 'V' : val.toString()) : '';
+        const chamCong = !isNaN(val) ? (val === 4 ? 'V' : (val === 0 ? 'X' : val.toString())) : '';
         const congSo = !isNaN(val) ? val : 0;
 
         const day = ngay.split('/')[0].padStart(2, '0');
