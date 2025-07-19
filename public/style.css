@@ -232,6 +232,11 @@
                 display: none;
             }
 
+            .content {
+                box-shadow: none !important;
+                background: white !important;
+            }
+
         }
 
         @media screen and (max-width: 768px) {
