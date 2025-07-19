@@ -51,6 +51,35 @@
             margin: 0 auto 20px;
         }
 
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px 30px;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin: 20px auto;
+            max-width: 100%;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 160px;
+        }
+
+        .filter-group label {
+            margin-bottom: 4px;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .filter-group select {
+            padding: 6px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+
 
         .bordered-table {
             size: A4;
@@ -235,6 +264,20 @@
             .content {
                 box-shadow: none !important;
                 background: white !important;
+            }
+
+            .filter-row {
+                flex-wrap: nowrap !important;
+            }
+
+            .filter-group {
+                min-width: 140px;
+            }
+
+            .filter-group label,
+            .filter-group select {
+                font-size: 12px;
+                white-space: nowrap;
             }
 
         }
