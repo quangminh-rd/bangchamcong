@@ -9,6 +9,7 @@
     <script src="./public/script.js" defer></script>
     <script src="./public/export-pdf.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.2.0/exceljs.min.js"></script>
+
 </head>
 
 <body>
@@ -16,27 +17,21 @@
         <img src="https://i.imgur.com/wfxMMZS.png" alt="Mô tả hình ảnh">
         <h2 style="text-align: center">BẢNG CHẤM CÔNG</h2>
 
-        <div class="filter-row">
-            <div class="filter-group">
-                <label for="namSelect"><strong>Chọn năm:</strong></label>
-                <select id="namSelect"></select>
-            </div>
+        <label for="namSelect" style="margin-left: 20px; margin-top: 30px;"><strong>Chọn năm:</strong></label>
+        <select id="namSelect" style="margin-left: 10px; padding: 5px;; margin-top: 30px"></select>
 
-            <div class="filter-group">
-                <label for="thangSelect"><strong>Chọn tháng:</strong></label>
-                <select id="thangSelect"></select>
-            </div>
+        <label for="thangSelect" style="margin-left: 20px;; margin-top: 30px"><strong>Chọn tháng:</strong></label>
+        <select id="thangSelect" style="margin-left: 10px; padding: 5px;; margin-top: 30px"></select>
 
-            <div class="filter-group">
-                <label for="khuvucSelect"><strong>Chọn khu vực:</strong></label>
-                <select id="khuvucSelect"></select>
-            </div>
+        <label for="khuvucSelect" style="margin-left: 20px;; margin-top: 30px"><strong>Chọn khu vực:</strong></label>
+        <select id="khuvucSelect" style="margin-left: 10px; padding: 5px;; margin-top: 30px"></select>
 
-            <div class="filter-group">
-                <label for="nhanvienSelect"><strong>Chọn nhân viên:</strong></label>
-                <select id="nhanvienSelect"></select>
-            </div>
+        <div class="nhanvien-wrapper" style="position: relative; margin-left: 20px; margin-top: 30px;">
+            <label for="nhanvienSelect"><strong>Chọn nhân viên:</strong></label>
+            <select id="nhanvienSelect" multiple size="1"></select>
         </div>
+
+
 
         <table class="bordered-table" style="margin-top: 20px;">
             <thead id="tableHeader"></thead>
@@ -59,6 +54,8 @@
         </table>
     </div>
     <button id="export-pdf" class="button-pdf">Xuất file PDF</button>
+    <button id="export-excel" class="button-excel">Xuất file Excel</button>
+
     <!-- Modal popup -->
     <div id="customPopup" class="modal">
         <div class="modal-content">

@@ -7,6 +7,192 @@ document.addEventListener('DOMContentLoaded', () => {
     script.src = "https://apis.google.com/js/api.js";
     script.onload = initializeGAPI;
     document.body.appendChild(script);
+    const excelBtn = document.getElementById('export-excel');
+    if (excelBtn) {
+        const excelBtn = document.getElementById('export-excel');
+        if (excelBtn) {
+            excelBtn.addEventListener('click', async () => {
+                const workbook = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet('Bảng chấm công');
+
+                // Tạo lưới ảo để xử lý chính xác vị trí ô
+                const table = document.querySelector('.bordered-table');
+                const rows = Array.from(table.querySelectorAll('tr'));
+                const grid = [];
+                const merges = [];
+
+                // Khởi tạo grid với các ô trống
+                rows.forEach((tr, rowIdx) => {
+                    grid[rowIdx] = [];
+                });
+
+                // Đổ dữ liệu vào grid và ghi nhận các ô cần merge
+                rows.forEach((tr, rowIdx) => {
+                    const cells = Array.from(tr.querySelectorAll('th, td'));
+                    let colIdx = 0;
+
+                    // Tìm cột trống tiếp theo
+                    while (grid[rowIdx][colIdx] !== undefined) {
+                        colIdx++;
+                    }
+
+                    cells.forEach(cell => {
+                        const colspan = parseInt(cell.getAttribute('colspan')) || 1;
+                        const rowspan = parseInt(cell.getAttribute('rowspan')) || 1;
+
+                        // Ghi nhận merge
+                        if (rowspan > 1 || colspan > 1) {
+                            merges.push({
+                                start: { row: rowIdx, col: colIdx },
+                                end: { row: rowIdx + rowspan - 1, col: colIdx + colspan - 1 }
+                            });
+                        }
+
+                        // Đánh dấu các ô bị chiếm chỗ
+                        for (let r = 0; r < rowspan; r++) {
+                            for (let c = 0; c < colspan; c++) {
+                                if (r === 0 && c === 0) {
+                                    // Ô chính
+                                    grid[rowIdx + r][colIdx + c] = {
+                                        content: cell.innerText.trim(),
+                                        element: cell
+                                    };
+                                } else {
+                                    // Ô bị merge
+                                    grid[rowIdx + r][colIdx + c] = 'merged';
+                                }
+                            }
+                        }
+
+                        colIdx += colspan;
+                    });
+                });
+
+                // Tạo worksheet từ grid
+                grid.forEach((row, rowIdx) => {
+                    const excelRow = worksheet.addRow([]);
+
+                    row.forEach((cell, colIdx) => {
+                        if (cell === 'merged') return; // Bỏ qua ô đã merge
+
+                        const excelCell = excelRow.getCell(colIdx + 1);
+                        excelCell.value = cell.content;
+
+                        const isDayCell = cell.element.classList.contains('borderedcol-day');
+
+                        excelCell.font = {
+                            name: 'Times New Roman',
+                            size: isDayCell ? 8 : 11, // Font size 8 cho ô ngày
+                            color: cell.element.classList.contains('highlight-x')
+                                ? { argb: 'FFFF0000' } : undefined
+                        };
+
+                        // Áp dụng fill cho các ô highlight-cn và header-green
+                        if (cell.element.classList.contains('highlight-cn')) {
+                            excelCell.fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: 'FF09B9FF' }
+                            };
+                        }
+                        if (cell.element.classList.contains('highlight-header-green')) {
+                            excelCell.fill = {
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: 'FFB6DB99' }
+                            };
+                        }
+
+                        // Căn giữa
+                        excelCell.alignment = {
+                            vertical: 'middle',
+                            horizontal: 'center',
+                            wrapText: true
+                        };
+
+                        // Border
+                        excelCell.border = {
+                            top: { style: 'thin' },
+                            left: { style: 'thin' },
+                            bottom: { style: 'thin' },
+                            right: { style: 'thin' }
+                        };
+
+                    });
+                });
+
+                // Áp dụng các merge
+                merges.forEach(merge => {
+                    worksheet.mergeCells(
+                        merge.start.row + 1,
+                        merge.start.col + 1,
+                        merge.end.row + 1,
+                        merge.end.col + 1
+                    );
+                });
+
+                // Đặt chiều rộng cột
+                worksheet.getColumn(1).width = 5;   // STT
+                worksheet.getColumn(2).width = 25;  // Tên NV
+                worksheet.getColumn(3).width = 10;  // Buổi
+
+                // Bôi đậm dòng 1 và dòng 2 (ExcelJS dùng chỉ số bắt đầu từ 1)
+                [1, 2].forEach(rowNumber => {
+                    const row = worksheet.getRow(rowNumber);
+                    row.eachCell(cell => {
+                        cell.font = {
+                            ...cell.font,
+                            bold: true
+                        };
+                    });
+                });
+
+                // Căn trái cột 2 và cột 3
+                [2, 3].forEach(col => {
+                    worksheet.getColumn(col).eachCell({ includeEmpty: true }, cell => {
+                        cell.alignment = {
+                            vertical: 'middle',
+                            horizontal: 'left',
+                            wrapText: true
+                        };
+                    });
+                });
+
+                // Cột ngày (giả sử có 31 ngày)
+                for (let i = 4; i <= 34; i++) {
+                    worksheet.getColumn(i).width = 4;
+                }
+
+                // Cột tổng (3 cột cuối)
+                const totalColumns = 3;
+                for (let i = 0; i < totalColumns; i++) {
+                    const colIndex = worksheet.columnCount - totalColumns + i + 1;
+                    worksheet.getColumn(colIndex).width = 8;
+                }
+
+                // Đóng băng header
+                worksheet.views = [{
+                    state: 'frozen',
+                    ySplit: 2 // Số dòng header
+                }];
+
+                // Xuất file
+                const buffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([buffer], {
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                });
+
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                const thangSelect = document.getElementById('thangSelect');
+                const namSelect = document.getElementById('namSelect');
+                const thang = thangSelect ? thangSelect.value : new Date().getMonth() + 1;
+                const nam = namSelect ? namSelect.value : new Date().getFullYear();
+                a.download = `Bảng chấm công tháng ${parseInt(thang)} năm ${nam}.xlsx`;
+                a.click();
+            });
+        }
+    }
 });
 
 function getDataFromURI() {
@@ -56,6 +242,7 @@ function populateSelect(maList, rows) {
     const allOpt = document.createElement('option');
     allOpt.value = 'ALL';
     allOpt.textContent = 'Tất cả';
+    allOpt.selected = true;
     nhanvienSelect.appendChild(allOpt);
 
     // Tạo danh sách mã nhân viên
@@ -110,8 +297,10 @@ function populateSelect(maList, rows) {
 
     // Sự kiện thay đổi
     nhanvienSelect.addEventListener('change', () => {
-        fetchAndRenderFor(khuvucSelect.value, nhanvienSelect.value, thangSelect.value, namSelect.value, rows);
+        const selectedNhanViens = Array.from(nhanvienSelect.selectedOptions).map(opt => opt.value);
+        fetchAndRenderFor(khuvucSelect.value, selectedNhanViens, thangSelect.value, namSelect.value, rows);
     });
+
 
     // Gắn event cho khu vực
     khuvucSelect.addEventListener('change', () => {
@@ -148,7 +337,10 @@ async function fetchAndRenderFor(khuVuc, maNhanvien, thang, nam) {
         tableBody.innerHTML = '';
 
         let allFiltered = [];
-        const maList = maNhanvien === 'ALL' ? danhSachMa : [maNhanvien];
+        const maList = Array.isArray(maNhanvien)
+            ? maNhanvien.includes('ALL') ? danhSachMa : maNhanvien
+            : (maNhanvien === 'ALL' ? danhSachMa : [maNhanvien]);
+
 
         for (const ma of maList) {
             const filtered = filterDataByNhanVienThangNam(rows, ma, thang, nam, selectedKhuVuc);
