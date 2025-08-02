@@ -325,6 +325,10 @@ img {
         display: none;
     }
 
+    .button-excel {
+        display: none;
+    }
+
     .content {
         box-shadow: none !important;
         background: white !important;
