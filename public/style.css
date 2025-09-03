@@ -367,6 +367,15 @@ img {
 
 @media print {
 
+    /* --- Cấu hình trang in --- */
+    @page {
+        size: A4 landscape;
+        /* Khổ giấy A3 ngang */
+        margin: 3mm;
+        /* Lề in hợp lý */
+    }
+
+    /* --- Reset chung --- */
     body {
         margin: 0;
         padding: 0;
@@ -376,37 +385,36 @@ img {
         margin: 0;
         padding: 0;
         width: 100%;
-        height: 100%;
+        height: auto;
     }
 
-    .button-pdf {
-        display: none;
+    /* --- Ẩn các nút và bộ lọc khi in --- */
+    .button-pdf,
+    .button-excel,
+    .filter-row {
+        display: none !important;
     }
 
-    .button-excel {
-        display: none;
-    }
-
+    /* --- Vùng nội dung --- */
     .content {
         box-shadow: none !important;
         background: white !important;
+        overflow-x: visible !important;
+        /* Hiển thị toàn bộ bảng khi in */
     }
 
-    .filter-row {
-        flex-wrap: nowrap !important;
+    /* --- Bảng --- */
+    .bordered-table {
+        width: 100% !important;
+        /* Bảng full khổ giấy */
+        table-layout: auto !important;
+        /* Tự co giãn các cột */
+        font-size: 10px;
+        /* Thu nhỏ font để vừa khổ giấy */
+        border-collapse: collapse;
     }
-
-    .filter-group {
-        min-width: 140px;
-    }
-
-    .filter-group label,
-    .filter-group select {
-        font-size: 12px;
-        white-space: nowrap;
-    }
-
 }
+
 
 @media screen and (max-width: 768px) {
     body {

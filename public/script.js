@@ -794,6 +794,4 @@ function updateDependentLists(rows) {
         }
     });
     nvSelect.value = 'ALL';
-
-
 }
