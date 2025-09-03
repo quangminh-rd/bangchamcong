@@ -1,6 +1,8 @@
 const SPREADSHEET_ID = '10_7GoBzJFFn43um77mBs1NWRzmHqgi_RRutVVR1Nf7g';
 const RANGE = 'cham_cong_theo_ca!A:X';
+const RANGE_BANG_LUONG = 'bang_luong!A:N';
 const API_KEY = 'AIzaSyA9g2qFUolpsu3_HVHOebdZb0NXnQgXlFM';
+let bangLuongMap = new Map();
 
 document.addEventListener('DOMContentLoaded', () => {
     const script = document.createElement('script');
@@ -362,6 +364,21 @@ async function fetchAndRenderFor(khuVuc, donVi, maNhanvien, thang, nam) {
         const rows = await fetchData();
         const danhSachMa = getDataFromURI().split('-');
 
+        const bangLuongRows = await fetchBangLuong();
+        // Ghi đè dữ liệu cho biến toàn cục
+        bangLuongMap = new Map();
+
+        // Giả sử cột 0 = id_luong, 1 = so_km_di_chuyen, 2 = phu_cap_gui_xe, 3 = phu_cap_dien_thoai, 4 = phu_cap_cho_hang
+        bangLuongRows.forEach(row => {
+            const id = row[0];
+            bangLuongMap.set(id, {
+                so_km_di_chuyen: row[6] || 0,
+                phu_cap_gui_xe: row[7] || 0,
+                phu_cap_dien_thoai: row[8] || 0,
+                phu_cap_cho_hang: row[9] || 0
+            });
+        });
+
         const tableHeader = document.getElementById('tableHeader');
         const tableBody = document.getElementById('tableBody');
         tableHeader.innerHTML = '';
@@ -397,7 +414,9 @@ async function fetchAndRenderFor(khuVuc, donVi, maNhanvien, thang, nam) {
         for (const item of allFiltered) {
             const processed = processChamCongData(item.data);
             const tenNV = item.data[0][3] || item.ma;
-            renderChamCongRow(processed, tenNV, stt++, daysInMonth, mm, yyyy);
+            const maBangluong = item.data[0][0] || item.ma;
+            renderChamCongRow(processed, tenNV, stt++, daysInMonth, mm, yyyy, maBangluong);
+
         }
 
         updateContent(""); // Xoá thông báo cũ nếu có
@@ -442,6 +461,14 @@ async function fetchData() {
     const res = await gapi.client.sheets.spreadsheets.values.get({
         spreadsheetId: SPREADSHEET_ID,
         range: RANGE
+    });
+    return res.result.values || [];
+}
+
+async function fetchBangLuong() {
+    const res = await gapi.client.sheets.spreadsheets.values.get({
+        spreadsheetId: SPREADSHEET_ID,
+        range: RANGE_BANG_LUONG
     });
     return res.result.values || [];
 }
@@ -632,6 +659,12 @@ function renderChamCongHeader(days, mm, yyyy) {
     html += `<th class="borderedcol-total highlight-header-green" rowspan="2">Số công</th>
              <th class="borderedcol-total highlight-header-green" rowspan="2">Tăng ca</th>
              <th class="borderedcol-total highlight-header-green" rowspan="2">Đi muộn</th>
+        `;
+    html += `
+            <th class="borderedcol-total highlight-header-green" rowspan="2">Di chuyển<br>(km)</th>
+            <th class="borderedcol-total highlight-header-green" rowspan="2">Gửi xe<br>(lần)</th>
+            <th class="borderedcol-total highlight-header-green" rowspan="2">Điện thoại<br>(lần)</th>
+            <th class="borderedcol-total highlight-header-green" rowspan="2">Chở hàng<br>(VNĐ)</th>
         </tr>`;
 
     // Dòng ngày
@@ -639,11 +672,13 @@ function renderChamCongHeader(days, mm, yyyy) {
     days.forEach((d, idx) => {
         html += `<th class="borderedcol-day ${cnColumns.includes(idx) ? 'highlight-cn' : 'highlight-header-green'}">${d}</th>`;
     });
+
     html += `</tr>`;
 
     header.innerHTML = html;
 }
-function renderChamCongRow(data, tenNhanVien, stt, days, mm, yyyy) {
+
+function renderChamCongRow(data, tenNhanVien, stt, days, mm, yyyy, ma) {
     const {
         sang, chieu,
         tongCongS, tongCongC,
@@ -675,7 +710,14 @@ function renderChamCongRow(data, tenNhanVien, stt, days, mm, yyyy) {
     html += `<td class="borderedcol-total" rowspan="2">${tongCongAll}</td>
              <td class="borderedcol-total" rowspan="2">${tongTCAll}</td>
              <td class="borderedcol-total" rowspan="2">${diMuonAll}</td>
-         </tr>`;
+        `;
+    const phuCap = bangLuongMap.get(ma) || {};
+    html += `
+            <td class="borderedcol-total" rowspan="2">${phuCap.so_km_di_chuyen || ''}</td>
+            <td class="borderedcol-total" rowspan="2">${phuCap.phu_cap_gui_xe || ''}</td>
+            <td class="borderedcol-total" rowspan="2">${phuCap.phu_cap_dien_thoai || ''}</td>
+            <td class="borderedcol-total" rowspan="2">${phuCap.phu_cap_cho_hang || ''}</td>
+        </tr>`;
 
     // Dòng chiều
     html += `<tr class="row-dashed-middle"><td class="borderedcol-3">Buổi chiều</td>`;
@@ -686,15 +728,19 @@ function renderChamCongRow(data, tenNhanVien, stt, days, mm, yyyy) {
         if (cnColumns.includes(idx)) classes.push('highlight-cn');
         html += `<td class="borderedcol-day ${classes.join(' ')}">${val}</td>`;
     });
+
     html += `</tr>`;
 
 
     body.innerHTML += html;
+
 }
 
 function updateDependentLists(rows) {
     const kvSelect = document.getElementById('khuvucSelect');
     const dvSelect = document.getElementById('donviSelect');
+
+    const danhSachMaURI = (getDataFromURI() || '').split('-');
     const nvSelect = document.getElementById('nhanvienSelect');
 
     // Bỏ qua dòng tiêu đề (dòng 1)
@@ -741,10 +787,13 @@ function updateDependentLists(rows) {
     nvSelect.appendChild(new Option('Tất cả', 'ALL'));
 
     uniqueNV.forEach(([ma, ten]) => {
-        const opt = new Option(ten, ma); // value = mã, text = tên
-        nvSelect.appendChild(opt);
+        // Chỉ thêm nếu mã nằm trong danh sách URI
+        if (danhSachMaURI.includes(ma)) {
+            const opt = new Option(ten, ma);
+            nvSelect.appendChild(opt);
+        }
     });
     nvSelect.value = 'ALL';
 
-}
 
+}

@@ -27,6 +27,7 @@ body {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     position: relative;
     z-index: 1;
+    overflow-x: auto;
 }
 
 h2 {
@@ -87,7 +88,8 @@ img {
     max-width: 297mm;
     border-collapse: collapse;
     margin-top: 10px;
-    table-layout: fixed;
+    table-layout: auto;
+    /* Cho phép tự căn độ rộng */
     font-size: 11px;
 }
 
@@ -99,7 +101,7 @@ img {
     page-break-inside: avoid;
 }
 
-.row-no-bottom td:not(:nth-child(-n+2)):not(:nth-last-child(-n+3)) {
+.row-no-bottom td:not(:nth-child(-n+2)):not(:nth-last-child(-n+7)) {
     border-bottom: none !important;
 }
 
@@ -134,7 +136,7 @@ img {
 }
 
 .borderedcol-total {
-    width: 3.5%;
+    width: 3%;
     text-align: center;
 }
 
