@@ -17,23 +17,38 @@
         <img src="https://i.imgur.com/wfxMMZS.png" alt="Mô tả hình ảnh">
         <h2 style="text-align: center">BẢNG CHẤM CÔNG</h2>
 
-        <label for="namSelect" style="margin-left: 20px; margin-top: 30px;"><strong>Chọn năm:</strong></label>
-        <select id="namSelect" style="margin-left: 10px; padding: 5px;; margin-top: 30px"></select>
+        <div class="filter-container">
+            <!-- Bên trái: Năm, Tháng -->
+            <div class="filter-left">
+                <div class="filter-item">
+                    <label for="namSelect"><strong>Chọn năm:</strong></label>
+                    <select id="namSelect"></select>
+                </div>
+                <div class="filter-item">
+                    <label for="thangSelect"><strong>Chọn tháng:</strong></label>
+                    <select id="thangSelect"></select>
+                </div>
+            </div>
 
-        <label for="thangSelect" style="margin-left: 20px;; margin-top: 30px"><strong>Chọn tháng:</strong></label>
-        <select id="thangSelect" style="margin-left: 10px; padding: 5px;; margin-top: 30px"></select>
-
-        <label for="khuvucSelect" style="margin-left: 20px;; margin-top: 30px"><strong>Chọn khu vực:</strong></label>
-        <select id="khuvucSelect" style="margin-left: 10px; padding: 5px;; margin-top: 30px"></select>
-
-        <div class="nhanvien-wrapper" style="position: relative; margin-left: 20px; margin-top: 30px;">
-            <label for="nhanvienSelect"><strong>Chọn nhân viên:</strong></label>
-            <select id="nhanvienSelect" multiple size="1"></select>
+            <!-- Bên phải: Khu vực, Bộ phận, Nhân viên -->
+            <div class="filter-right">
+                <div class="filter-item">
+                    <label for="khuvucSelect"><strong>Chọn khu vực:</strong></label>
+                    <select id="khuvucSelect"></select>
+                </div>
+                <div class="filter-item">
+                    <label for="donviSelect"><strong>Chọn bộ phận:</strong></label>
+                    <select id="donviSelect"></select>
+                </div>
+                <div class="filter-item nhanvien-wrapper">
+                    <label for="nhanvienSelect"><strong>Chọn nhân viên:</strong></label>
+                    <select id="nhanvienSelect" multiple size="2"></select>
+                </div>
+            </div>
         </div>
 
 
-
-        <table class="bordered-table" style="margin-top: 20px;">
+        <table class="bordered-table" style="margin-top: 50px;">
             <thead id="tableHeader"></thead>
             <tbody id="tableBody"></tbody>
         </table>

@@ -286,6 +286,62 @@ img {
     background-color: #071591;
 }
 
+.filter-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.filter-left,
+.filter-right {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    flex: 1;
+}
+
+.filter-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-item label {
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+
+.filter-item select {
+    padding: 6px;
+    font-size: 14px;
+    width: 100%;
+}
+
+.nhanvien-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+#nhanvienSelect {
+    position: absolute;
+    /* ✅ Không dùng fixed nữa */
+    top: 23px;
+    /* ✅ Đỉnh trùng label */
+    left: 0px;
+    /* ✅ Căn sang phải một chút cho không đè lên label */
+    z-index: 100;
+    height: 28px;
+    line-height: 2.5;
+    /* ✅ Tránh cắt chữ */
+    padding: 6px 8px;
+    font-size: 14px;
+    min-width: 180px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    background: white;
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;

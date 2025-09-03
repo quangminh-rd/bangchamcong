@@ -207,6 +207,12 @@ function getKhuVucFromURI() {
     return match ? decodeURIComponent(match[1]).split('-') : [];
 }
 
+function getDonViFromURI() {
+    const url = window.location.href;
+    const match = url.match(/donVi=([^?&]*)/);
+    return match ? decodeURIComponent(match[1]).split('-') : [];
+}
+
 function updateContent(message) {
     const el = document.getElementById("contentMessage");
     if (el) el.innerText = message;
@@ -270,6 +276,23 @@ function populateSelect(maList, rows) {
     });
     khuvucSelect.value = 'ALL'; // Default
 
+    const donviSelect = document.getElementById('donviSelect');
+    const danhSachDonVi = getDonViFromURI();
+
+    // Tạo option khu vực
+    const allDonviOpt = document.createElement('option');
+    allDonviOpt.value = 'ALL';
+    allDonviOpt.textContent = 'Tất cả';
+    donviSelect.appendChild(allDonviOpt);
+
+    danhSachDonVi.forEach(dv => {
+        const opt = document.createElement('option');
+        opt.value = dv;
+        opt.textContent = dv;
+        donviSelect.appendChild(opt);
+    });
+    donviSelect.value = 'ALL'; // Default
+
     // Tạo danh sách tháng (01 - 12)
     for (let i = 1; i <= 12; i++) {
         const thang = String(i).padStart(2, '0');
@@ -298,21 +321,27 @@ function populateSelect(maList, rows) {
     // Sự kiện thay đổi
     nhanvienSelect.addEventListener('change', () => {
         const selectedNhanViens = Array.from(nhanvienSelect.selectedOptions).map(opt => opt.value);
-        fetchAndRenderFor(khuvucSelect.value, selectedNhanViens, thangSelect.value, namSelect.value, rows);
+        fetchAndRenderFor(khuvucSelect.value, donviSelect.value, selectedNhanViens, thangSelect.value, namSelect.value, rows);
     });
 
+    // Gắn event cho đơn vị
+    donviSelect.addEventListener('change', () => {
+        updateDependentLists(rows);
+        fetchAndRenderFor(khuvucSelect.value, donviSelect.value, nhanvienSelect.value, thangSelect.value, namSelect.value, rows);
+    });
 
     // Gắn event cho khu vực
     khuvucSelect.addEventListener('change', () => {
-        fetchAndRenderFor(khuvucSelect.value, nhanvienSelect.value, thangSelect.value, namSelect.value, rows);
+        updateDependentLists(rows);
+        fetchAndRenderFor(khuvucSelect.value, donviSelect.value, nhanvienSelect.value, thangSelect.value, namSelect.value, rows);
     });
 
     namSelect.addEventListener('change', () => {
-        fetchAndRenderFor(khuvucSelect.value, nhanvienSelect.value, thangSelect.value, namSelect.value, rows);
+        fetchAndRenderFor(khuvucSelect.value, donviSelect.value, nhanvienSelect.value, thangSelect.value, namSelect.value, rows);
     });
 
     thangSelect.addEventListener('change', () => {
-        fetchAndRenderFor(khuvucSelect.value, nhanvienSelect.value, thangSelect.value, namSelect.value, rows);
+        fetchAndRenderFor(khuvucSelect.value, donviSelect.value, nhanvienSelect.value, thangSelect.value, namSelect.value, rows);
     });
 
     // Sau khi setup xong, gọi fetchAndRenderFor tự động
@@ -320,13 +349,15 @@ function populateSelect(maList, rows) {
     const thang = thangSelect.value;
     const nam = namSelect.value;
     const khuVuc = khuvucSelect.value;
+    const donVi = donviSelect.value;
 
-    fetchAndRenderFor(khuVuc, maNhanvien, thang, nam, rows);
+    fetchAndRenderFor(khuVuc, donVi, maNhanvien, thang, nam, rows);
 
 }
 
-async function fetchAndRenderFor(khuVuc, maNhanvien, thang, nam) {
+async function fetchAndRenderFor(khuVuc, donVi, maNhanvien, thang, nam) {
     const selectedKhuVuc = document.getElementById('khuvucSelect').value;
+    const selectedDonVi = document.getElementById('donviSelect').value;
     try {
         const rows = await fetchData();
         const danhSachMa = getDataFromURI().split('-');
@@ -343,7 +374,7 @@ async function fetchAndRenderFor(khuVuc, maNhanvien, thang, nam) {
 
 
         for (const ma of maList) {
-            const filtered = filterDataByNhanVienThangNam(rows, ma, thang, nam, selectedKhuVuc);
+            const filtered = filterDataByNhanVienThangNam(rows, ma, thang, nam, selectedKhuVuc, selectedDonVi);
             if (filtered.length > 0) allFiltered.push({ ma, data: filtered });
         }
 
@@ -397,6 +428,7 @@ function initializeGAPI() {
             const danhSachMa = maNhanviens.split('-');
             const rows = await fetchData();
             populateSelect(danhSachMa, rows);
+            updateDependentLists(rows); // <-- Gọi ngay khi dữ liệu được load
 
         } catch (error) {
             console.error(error);
@@ -414,11 +446,12 @@ async function fetchData() {
     return res.result.values || [];
 }
 
-function filterDataByNhanVienThangNam(rows, maNhanvien, thang, nam, khuVuc = 'ALL') {
+function filterDataByNhanVienThangNam(rows, maNhanvien, thang, nam, khuVuc = 'ALL', donVi = 'ALL') {
     return rows.filter(row => {
         const ma = row[2];
         const ngay = row[5];
         const kv = row[19]; // Cột T
+        const dv = row[20]; // Cột U
         const ten = row[3];
         const [dd, mm, yyyy] = (ngay || '').split('/');
 
@@ -426,8 +459,9 @@ function filterDataByNhanVienThangNam(rows, maNhanvien, thang, nam, khuVuc = 'AL
         const matchThang = mm === thang;
         const matchNam = yyyy === nam;
         const matchKhuVuc = khuVuc === 'ALL' || kv === khuVuc;
+        const matchDonVi = donVi === 'ALL' || dv === donVi;
 
-        return matchMa && matchThang && matchNam && matchKhuVuc;
+        return matchMa && matchThang && matchNam && matchKhuVuc && matchDonVi;
     });
 }
 
@@ -657,3 +691,60 @@ function renderChamCongRow(data, tenNhanVien, stt, days, mm, yyyy) {
 
     body.innerHTML += html;
 }
+
+function updateDependentLists(rows) {
+    const kvSelect = document.getElementById('khuvucSelect');
+    const dvSelect = document.getElementById('donviSelect');
+    const nvSelect = document.getElementById('nhanvienSelect');
+
+    // Bỏ qua dòng tiêu đề (dòng 1)
+    const dataRows = rows.slice(1);
+
+    const selectedKV = kvSelect.value;
+    const selectedDV = dvSelect.value;
+
+    // --- 1. Lọc dữ liệu theo khu vực và bộ phận hiện tại
+    const filteredRows = dataRows.filter(row => {
+        const kv = row[19];  // Khu vực
+        const dv = row[20];  // Bộ phận
+        return (selectedKV === 'ALL' || kv === selectedKV) &&
+            (selectedDV === 'ALL' || dv === selectedDV);
+    });
+
+    // --- 2. Cập nhật danh sách khu vực
+    const uniqueKV = [...new Set(dataRows.map(row => row[19]).filter(Boolean))];
+    kvSelect.innerHTML = '';
+    kvSelect.appendChild(new Option('Tất cả', 'ALL'));
+    uniqueKV.forEach(kv => kvSelect.appendChild(new Option(kv, kv)));
+    kvSelect.value = selectedKV;
+
+    // --- 3. Cập nhật danh sách bộ phận (lọc theo khu vực)
+    const uniqueDV = [...new Set(
+        dataRows
+            .filter(row => (selectedKV === 'ALL' || row[19] === selectedKV))
+            .map(row => row[20])
+            .filter(Boolean)
+    )];
+    dvSelect.innerHTML = '';
+    dvSelect.appendChild(new Option('Tất cả', 'ALL'));
+    uniqueDV.forEach(dv => dvSelect.appendChild(new Option(dv, dv)));
+    if (!uniqueDV.includes(selectedDV)) {
+        dvSelect.value = 'ALL';
+    } else {
+        dvSelect.value = selectedDV;
+    }
+
+    // --- 4. Cập nhật danh sách nhân viên (lọc theo khu vực + bộ phận)
+    const uniqueNV = [...new Map(filteredRows.map(row => [row[2], row[3]])).entries()];
+
+    nvSelect.innerHTML = '';
+    nvSelect.appendChild(new Option('Tất cả', 'ALL'));
+
+    uniqueNV.forEach(([ma, ten]) => {
+        const opt = new Option(ten, ma); // value = mã, text = tên
+        nvSelect.appendChild(opt);
+    });
+    nvSelect.value = 'ALL';
+
+}
+
