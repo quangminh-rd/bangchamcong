@@ -372,6 +372,8 @@ async function fetchAndRenderFor(khuVuc, donVi, maNhanvien, thang, nam) {
         bangLuongRows.forEach(row => {
             const id = row[0];
             bangLuongMap.set(id, {
+                so_ngay_lam_viec: row[4] || 0,
+                tang_ca: row[5] || 0,
                 so_km_di_chuyen: row[6] || 0,
                 phu_cap_gui_xe: row[7] || 0,
                 phu_cap_dien_thoai: row[8] || 0,
@@ -707,11 +709,11 @@ function renderChamCongRow(data, tenNhanVien, stt, days, mm, yyyy, ma) {
         if (cnColumns.includes(idx)) classes.push('highlight-cn');
         html += `<td class="borderedcol-day ${classes.join(' ')}">${val}</td>`;
     });
-    html += `<td class="borderedcol-total" rowspan="2">${tongCongAll}</td>
-             <td class="borderedcol-total" rowspan="2">${tongTCAll}</td>
+    const phuCap = bangLuongMap.get(ma) || {};
+    html += `<td class="borderedcol-total" rowspan="2">${phuCap.so_ngay_lam_viec || ''}</td>
+             <td class="borderedcol-total" rowspan="2">${phuCap.tang_ca || ''}</td>
              <td class="borderedcol-total" rowspan="2">${diMuonAll}</td>
         `;
-    const phuCap = bangLuongMap.get(ma) || {};
     html += `
             <td class="borderedcol-total" rowspan="2">${phuCap.so_km_di_chuyen || ''}</td>
             <td class="borderedcol-total" rowspan="2">${phuCap.phu_cap_gui_xe || ''}</td>
